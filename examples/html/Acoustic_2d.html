@@ -1,0 +1,217 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>2D Acoustic wave-equation</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-11-25"><meta name="DC.source" content="Acoustic_2d.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>2D Acoustic wave-equation</h1><!--introduction--><p><img src="Acoustic_2d_eq72205.png" alt="$$\left(\begin{array}{cc}\kappa^{-1}&amp;0\\0&amp;\rho \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{cc}0&amp;\nabla\cdot\\\nabla&amp;0 \end{array}\right)\mathbf{w} = 0$$"></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">set parameters</a></li><li><a href="#2">define matrices etc.</a></li><li><a href="#3">solve ODE</a></li><li><a href="#4">plot</a></li></ul></div><h2>set parameters<a name="1"></a></h2><pre class="codeinput"><span class="comment">% method, fourier or cheb</span>
+method = <span class="string">'fourier'</span>;
+<span class="comment">% dimension</span>
+nd = 2;
+<span class="comment">% size of domain (m)</span>
+L = 1e3*ones(1,nd);
+<span class="comment">% # of gridpoints</span>
+N = 100*ones(1,nd);
+<span class="comment">% # of nodes for spectral method</span>
+Ns = 50*ones(1,nd);
+<span class="comment">% time interval</span>
+T = 1;
+<span class="comment">% medium parameters</span>
+rho0 = 1e3; <span class="comment">% density kg/m^3</span>
+c0   = 1e3; <span class="comment">% velocity in m/s</span>
+</pre><h2>define matrices etc.<a name="2"></a></h2><pre class="codeinput"><span class="comment">% Gradient operator</span>
+Grad = opGrad(Ns,L,method,true);
+
+<span class="comment">% spectral grid</span>
+xc = Grad.x{1};
+yc = Grad.x{2};
+[xxc,yyc] = ndgrid(xc,yc);
+
+<span class="comment">% stiffness matrix, note that Div = -Grad' !</span>
+S    = [opZeros(prod(Ns)) Grad; -Grad' opZeros(nd*prod(Ns))];
+
+<span class="comment">% mass matrix</span>
+rho    = rho0*ones(Ns);
+kappa  = (c0^2*rho0)*ones(Ns);
+M      = opDiag([kappa(:).^(-1);rho(:);rho(:)]);
+
+<span class="comment">% regular grid</span>
+x = linspace(0,L(1),N(1));
+y = linspace(0,L(2),N(2));
+
+<span class="comment">% interpolation</span>
+A = opKron(opInt(yc,y,method),opInt(xc,x,method));
+
+<span class="comment">% Initial conditions, w = [p; ux ; uy]</span>
+w0        = zeros([Ns 3]);
+w0(:,:,1) = exp(-1e3*(((xxc - mean(xc))/L(1)).^2 + ((yyc - mean(yc))/L(2)).^2));
+w0        = w0(:)/max(abs(w0(:)));
+</pre><h2>solve ODE<a name="3"></a></h2><pre class="codeinput">tic
+options  = odeset(<span class="string">'Stats'</span>,<span class="string">'on'</span>);
+[t,wsol] = ode23(@(t,w)-(M\(S*w)),[0 T],w0,options) ;
+toc
+</pre><pre class="codeoutput">496 successful steps
+14 failed attempts
+1531 function evaluations
+Elapsed time is 5.017169 seconds.
+</pre><h2>plot<a name="4"></a></h2><pre class="codeinput">wsol = reshape(wsol,[length(t) prod(Ns) 3]);
+<span class="keyword">for</span> j=1:1:length(t);
+
+    pj = reshape(A*squeeze(wsol(j,:,1).'),N);
+    uj = reshape(A*squeeze(wsol(j,:,2).'),N);
+    vj = reshape(A*squeeze(wsol(j,:,3).'),N);
+
+    subplot(1,3,1);
+    imagesc(y,x,pj,[-1 1]*1e-1);title(<span class="string">'p'</span>);colormap(gray);axis <span class="string">equal</span> <span class="string">tight</span>;
+    subplot(1,3,2);
+    imagesc(y,x,uj,[-1 1]*1e-7);title(<span class="string">'u'</span>);colormap(gray);axis <span class="string">equal</span> <span class="string">tight</span>;
+    subplot(1,3,3);
+    imagesc(y,x,vj,[-1 1]*1e-7);title(<span class="string">'v'</span>);colormap(gray);axis <span class="string">equal</span> <span class="string">tight</span>;
+    drawnow;
+    pause(.001);
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="Acoustic_2d_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% 2D Acoustic wave-equation
+% 
+% $$\left(\begin{array}{cc}\kappa^{-1}&0\\0&\rho \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{cc}0&\nabla\cdot\\\nabla&0 \end{array}\right)\mathbf{w} = 0$$
+%
+% 
+
+%% set parameters
+%
+
+% method, fourier or cheb
+method = 'fourier';
+% dimension
+nd = 2;
+% size of domain (m)
+L = 1e3*ones(1,nd);
+% # of gridpoints
+N = 100*ones(1,nd);
+% # of nodes for spectral method
+Ns = 50*ones(1,nd);
+% time interval
+T = 1;
+% medium parameters
+rho0 = 1e3; % density kg/m^3
+c0   = 1e3; % velocity in m/s
+
+%% define matrices etc.
+%
+
+% Gradient operator
+Grad = opGrad(Ns,L,method,true);
+
+% spectral grid
+xc = Grad.x{1};
+yc = Grad.x{2};
+[xxc,yyc] = ndgrid(xc,yc);
+
+% stiffness matrix, note that Div = -Grad' !
+S    = [opZeros(prod(Ns)) Grad; -Grad' opZeros(nd*prod(Ns))];
+
+% mass matrix
+rho    = rho0*ones(Ns); 
+kappa  = (c0^2*rho0)*ones(Ns);
+M      = opDiag([kappa(:).^(-1);rho(:);rho(:)]);
+
+% regular grid
+x = linspace(0,L(1),N(1));
+y = linspace(0,L(2),N(2));
+
+% interpolation
+A = opKron(opInt(yc,y,method),opInt(xc,x,method));
+
+% Initial conditions, w = [p; ux ; uy]
+w0        = zeros([Ns 3]);
+w0(:,:,1) = exp(-1e3*(((xxc - mean(xc))/L(1)).^2 + ((yyc - mean(yc))/L(2)).^2));
+w0        = w0(:)/max(abs(w0(:)));
+
+
+%% solve ODE
+tic
+options  = odeset('Stats','on');
+[t,wsol] = ode23(@(t,w)-(M\(S*w)),[0 T],w0,options) ;
+toc
+
+%% plot
+wsol = reshape(wsol,[length(t) prod(Ns) 3]);
+for j=1:1:length(t);
+    
+    pj = reshape(A*squeeze(wsol(j,:,1).'),N);
+    uj = reshape(A*squeeze(wsol(j,:,2).'),N);
+    vj = reshape(A*squeeze(wsol(j,:,3).'),N);
+    
+    subplot(1,3,1);
+    imagesc(y,x,pj,[-1 1]*1e-1);title('p');colormap(gray);axis equal tight;
+    subplot(1,3,2);
+    imagesc(y,x,uj,[-1 1]*1e-7);title('u');colormap(gray);axis equal tight;
+    subplot(1,3,3);
+    imagesc(y,x,vj,[-1 1]*1e-7);title('v');colormap(gray);axis equal tight;  
+    drawnow;
+    pause(.001);
+end
+##### SOURCE END #####
+--></body></html>

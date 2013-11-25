@@ -1,0 +1,254 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>3D Maxwell's equation</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-11-25"><meta name="DC.source" content="Maxwell_3d.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>3D Maxwell's equation</h1><!--introduction--><p><img src="Maxwell_3d_eq62713.png" alt="$$\left(\begin{array}{cc}\epsilon&amp;0\\0&amp;\mu \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{cc}0&amp;\nabla\times\\\nabla\times&amp;0 \end{array}\right)\mathbf{w} = 0$$"></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">set parameters</a></li><li><a href="#2">define matrices etc.</a></li><li><a href="#3">solve ODE</a></li><li><a href="#4">plot</a></li></ul></div><h2>set parameters<a name="1"></a></h2><pre class="codeinput"><span class="comment">% method, fourier or cheb</span>
+method = <span class="string">'fourier'</span>;
+<span class="comment">% dimension</span>
+nd = 3;
+<span class="comment">% size of domain (m)</span>
+L = 1e3*ones(1,nd);
+<span class="comment">% # of gridpoints</span>
+N = 30*ones(1,nd);
+<span class="comment">% # of nodes for spectral method</span>
+Ns = 10*ones(1,nd);
+<span class="comment">% time interval</span>
+T = 1e-6;
+<span class="comment">% medium parameters</span>
+eps0 = 8.85e-12; <span class="comment">% di-electric permitivity</span>
+mu0  = 1.25e-6;  <span class="comment">% magnetic permeability</span>
+</pre><h2>define matrices etc.<a name="2"></a></h2><pre class="codeinput"><span class="comment">% Grad</span>
+Grad = opGrad(Ns,L,method,true);
+<span class="comment">% Curl</span>
+Curl = opCurl(Ns,L,method,true);
+
+<span class="comment">% spectral grid</span>
+xc = Curl.x{1};
+yc = Curl.x{2};
+zc = Curl.x{3};
+[xxc,yyc,zzc] = ndgrid(xc,yc,zc);
+
+<span class="comment">% stiffness matrix</span>
+S    = [opZeros(nd*prod(Ns)) Curl; -Curl' opZeros(nd*prod(Ns))];
+
+<span class="comment">% mass matrix</span>
+eps    = eps0*ones(Ns);
+mu     = (mu0)*ones(Ns);
+M      = opDiag([eps(:);eps(:);eps(:);mu(:);mu(:);mu(:)]);
+
+<span class="comment">% regular grid</span>
+x = linspace(0,L(1),N(1));
+y = linspace(0,L(2),N(2));
+z = linspace(0,L(3),N(3));
+
+<span class="comment">% interpolation</span>
+A = opKron(opInt(zc,z,method),opInt(yc,y,method),opInt(xc,x,method));
+
+<span class="comment">% Initial conditions w = [ex; ey; ex; hx; hy; hz]</span>
+w0        = zeros([Ns 6]);
+w0(:,:,:,1) = (yyc - mean(yc)).*exp(-1e3*(((xxc - mean(xc))/L(1)).^2 + ((yyc - mean(yc))/L(2)).^2 + ((zzc - mean(zc))/L(3)).^2));
+w0(:,:,:,2) = -(xxc - mean(xc)).*exp(-1e3*(((xxc - mean(xc))/L(1)).^2 + ((yyc - mean(yc))/L(2)).^2 + ((zzc - mean(zc))/L(3)).^2));
+w0          = w0(:)/max(abs(w0(:)));
+</pre><h2>solve ODE<a name="3"></a></h2><pre class="codeinput">tic
+options  = odeset(<span class="string">'Stats'</span>,<span class="string">'on'</span>);
+[t,wsol] = ode23(@(t,w)-(M\(S*w)),[0 T],w0,options) ;
+toc
+</pre><pre class="codeoutput">2374 successful steps
+215 failed attempts
+7768 function evaluations
+Elapsed time is 38.674411 seconds.
+</pre><h2>plot<a name="4"></a></h2><pre class="codeinput">wsol      = reshape(wsol,[length(t) prod(Ns) 6]);
+plotslice = @(u) slice(u,floor(N(1)/2) + 1,floor(N(2)/2) + 1,floor(N(3)/2) + 1);
+<span class="keyword">for</span> j=1:10:length(t);
+
+    exj = reshape(A*squeeze(wsol(j,:,1).'),N);
+    eyj = reshape(A*squeeze(wsol(j,:,2).'),N);
+    ezj = reshape(A*squeeze(wsol(j,:,3).'),N);
+
+    hxj = reshape(A*squeeze(wsol(j,:,1).'),N);
+    hyj = reshape(A*squeeze(wsol(j,:,2).'),N);
+    hzj = reshape(A*squeeze(wsol(j,:,3).'),N);
+
+    subplot(2,3,1);
+    plotslice(exj);title(<span class="string">'E_x'</span>);colormap(gray);
+    subplot(2,3,2);
+    plotslice(eyj);title(<span class="string">'E_y'</span>);colormap(gray);
+    subplot(2,3,3);
+    plotslice(ezj);title(<span class="string">'E_z'</span>);colormap(gray);
+
+    subplot(2,3,4);
+    plotslice(hxj);title(<span class="string">'H_x'</span>);colormap(gray);
+    subplot(2,3,5);
+    plotslice(hyj);title(<span class="string">'H_y'</span>);colormap(gray);
+    subplot(2,3,6);
+    plotslice(hzj);title(<span class="string">'H_z'</span>);colormap(gray);
+
+    drawnow;
+    pause(.001);
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="Maxwell_3d_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% 3D Maxwell's equation
+% 
+% $$\left(\begin{array}{cc}\epsilon&0\\0&\mu \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{cc}0&\nabla\times\\\nabla\times&0 \end{array}\right)\mathbf{w} = 0$$
+%
+
+
+
+%% set parameters
+%
+
+% method, fourier or cheb
+method = 'fourier';
+% dimension
+nd = 3;
+% size of domain (m)
+L = 1e3*ones(1,nd);
+% # of gridpoints
+N = 30*ones(1,nd);
+% # of nodes for spectral method
+Ns = 10*ones(1,nd);
+% time interval
+T = 1e-6;
+% medium parameters
+eps0 = 8.85e-12; % di-electric permitivity 
+mu0  = 1.25e-6;  % magnetic permeability
+
+%% define matrices etc.
+%
+
+% Grad
+Grad = opGrad(Ns,L,method,true);
+% Curl
+Curl = opCurl(Ns,L,method,true);
+
+% spectral grid
+xc = Curl.x{1};
+yc = Curl.x{2};
+zc = Curl.x{3};
+[xxc,yyc,zzc] = ndgrid(xc,yc,zc);
+
+% stiffness matrix
+S    = [opZeros(nd*prod(Ns)) Curl; -Curl' opZeros(nd*prod(Ns))];
+
+% mass matrix
+eps    = eps0*ones(Ns); 
+mu     = (mu0)*ones(Ns);
+M      = opDiag([eps(:);eps(:);eps(:);mu(:);mu(:);mu(:)]);
+
+% regular grid
+x = linspace(0,L(1),N(1));
+y = linspace(0,L(2),N(2));
+z = linspace(0,L(3),N(3));
+
+% interpolation
+A = opKron(opInt(zc,z,method),opInt(yc,y,method),opInt(xc,x,method));
+
+% Initial conditions w = [ex; ey; ex; hx; hy; hz]
+w0        = zeros([Ns 6]);
+w0(:,:,:,1) = (yyc - mean(yc)).*exp(-1e3*(((xxc - mean(xc))/L(1)).^2 + ((yyc - mean(yc))/L(2)).^2 + ((zzc - mean(zc))/L(3)).^2));
+w0(:,:,:,2) = -(xxc - mean(xc)).*exp(-1e3*(((xxc - mean(xc))/L(1)).^2 + ((yyc - mean(yc))/L(2)).^2 + ((zzc - mean(zc))/L(3)).^2));
+w0          = w0(:)/max(abs(w0(:)));
+
+
+%% solve ODE
+tic
+options  = odeset('Stats','on');
+[t,wsol] = ode23(@(t,w)-(M\(S*w)),[0 T],w0,options) ;
+toc
+
+%% plot
+wsol      = reshape(wsol,[length(t) prod(Ns) 6]);
+plotslice = @(u) slice(u,floor(N(1)/2) + 1,floor(N(2)/2) + 1,floor(N(3)/2) + 1);
+for j=1:10:length(t);
+    
+    exj = reshape(A*squeeze(wsol(j,:,1).'),N);
+    eyj = reshape(A*squeeze(wsol(j,:,2).'),N);
+    ezj = reshape(A*squeeze(wsol(j,:,3).'),N);
+    
+    hxj = reshape(A*squeeze(wsol(j,:,1).'),N);
+    hyj = reshape(A*squeeze(wsol(j,:,2).'),N);
+    hzj = reshape(A*squeeze(wsol(j,:,3).'),N);
+    
+    subplot(2,3,1);
+    plotslice(exj);title('E_x');colormap(gray);
+    subplot(2,3,2);
+    plotslice(eyj);title('E_y');colormap(gray);
+    subplot(2,3,3);
+    plotslice(ezj);title('E_z');colormap(gray);
+
+    subplot(2,3,4);
+    plotslice(hxj);title('H_x');colormap(gray);
+    subplot(2,3,5);
+    plotslice(hyj);title('H_y');colormap(gray);
+    subplot(2,3,6);
+    plotslice(hzj);title('H_z');colormap(gray);
+    
+    drawnow;
+    pause(.001);
+end
+##### SOURCE END #####
+--></body></html>
