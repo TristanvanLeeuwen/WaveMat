@@ -1,0 +1,304 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>3D Elastic wave-equation</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-12-09"><meta name="DC.source" content="Elastic_3d.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>3D Elastic wave-equation</h1><!--introduction--><p><img src="Elastic_3d_eq30385.png" alt="$$\left(\begin{array}{ccc}\rho&amp;0&amp;0\\0&amp;I&amp;0\\0&amp;0&amp;I \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{ccc}C_{11}&amp;0&amp;0\\0&amp;C_{22}&amp;0\\0&amp;0&amp;C_{33} \end{array}\right)\left(\begin{array}{ccc}0&amp;D_1&amp;D_2\\D_1&amp;0&amp;0\\D_2&amp;0&amp;0 \end{array}\right)\mathbf{w} = 0$$"></p><p>where</p><p><img src="Elastic_3d_eq31647.png" alt="$$C_{11} = I, \quad C_{22} = \left(\begin{array}{ccc}\lambda + 2\mu&amp;\lambda&amp;\lambda\\\lambda&amp;\lambda + 2\mu &amp;\lambda \\ \lambda &amp;\lambda &amp;\lambda + 2\mu \end{array}\right), \quad C_{33} = \left(\begin{array}{ccc}\mu&amp;0&amp;0\\0&amp;\mu&amp;0\\0&amp;0&amp;\mu \end{array}\right)$$"></p><p><img src="Elastic_3d_eq87573.png" alt="$$D_1 = \left(\begin{array}{ccc}\partial_x&amp;0&amp;0\\0&amp;\partial_y&amp;0\\0&amp;0&amp;\partial_z \end{array}\right), \quad D_1 = \left(\begin{array}{ccc}0&amp;\partial_z&amp;\partial_y\\\partial_z&amp;0&amp;\partial_x\\\partial_y&amp;\partial_x&amp;0 \end{array}\right)$$"></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">set parameters</a></li><li><a href="#2">define matrices etc.</a></li><li><a href="#3">solve ODE</a></li><li><a href="#4">plot</a></li></ul></div><h2>set parameters<a name="1"></a></h2><pre class="codeinput"><span class="comment">% method, fourier or cheb</span>
+method = <span class="string">'fourier'</span>;
+<span class="comment">% dimension</span>
+nd = 3;
+<span class="comment">% size of domain (m)</span>
+L = 1e3*ones(1,nd);
+<span class="comment">% # of gridpoints</span>
+N = 30*ones(1,nd);
+<span class="comment">% # of nodes for spectral method</span>
+Ns = 10*ones(1,nd);
+<span class="comment">% time interval</span>
+T = .5;
+<span class="comment">% medium parameters</span>
+rho0 = 1e3;
+cp0  = 2e3;
+cs0  = 1e3;
+</pre><h2>define matrices etc.<a name="2"></a></h2><pre class="codeinput">store = false;
+
+<span class="comment">% Gradient operator</span>
+Dx = opDel(Ns,L,1,method,store);
+Dy = opDel(Ns,L,2,method,store);
+Dz = opDel(Ns,L,3,method,store);
+
+<span class="comment">%</span>
+O = opZeros(prod(Ns));
+
+<span class="comment">% spectral grid</span>
+xc = Dx.x{1};
+yc = Dy.x{2};
+zc = Dz.x{3};
+[xxc,yyc,zzc] = ndgrid(xc,yc,zc);
+
+<span class="comment">% stiffness matrix, note that Div = -Grad' !</span>
+D1   = [O Dz Dy;Dz O Dx;Dy Dx O];
+D2   = opBlockDiag(Dx,Dy,Dz);
+OO   = opZeros(size(D1));
+S    = [OO D1 D2;-D1' OO OO;-D2' OO OO];
+
+<span class="comment">% mass matrix</span>
+rho       = rho0*ones(Ns);
+lambda    = rho0*(cp0^2 - cs0^2)*ones(Ns);
+mu        = (cs0^2*rho0)*ones(Ns);
+
+M         = opDiag([1./rho(:);1./rho(:);1./rho(:);ones(6*prod(Ns),1)]);<span class="comment">%opBlockDiag(opKron(opDirac(3),opDiag(1./rho(:))),opDirac(6*prod(Ns)));</span>
+C11       = opDirac(3*prod(Ns));
+C22       = [opDiag(lambda(:)+2*mu(:)) opDiag(lambda(:)) opDiag(lambda(:));opDiag(lambda(:)) opDiag(lambda(:)+2*mu(:)) opDiag(lambda(:));opDiag(lambda(:)) opDiag(lambda(:)) opDiag(lambda(:)+2*mu(:))];<span class="comment">%opKron(opDirac(3),opDiag(2*mu(:))) + opKron(opOnes(3),opDiag(lambda(:)));</span>
+C33       = opDiag([mu(:) mu(:) mu(:)]);<span class="comment">%opKron(opDirac(3),opDiag(mu(:)));</span>
+C         = opBlockDiag(C11,C22,C33);
+
+
+<span class="comment">% regular grid</span>
+x = linspace(0,L(1),N(1));
+y = linspace(0,L(2),N(2));
+z = linspace(0,L(3),N(3));
+
+<span class="comment">% interpolation</span>
+A = opKron(opInt(zc,z,method),opInt(yc,y,method),opInt(xc,x,method));
+
+<span class="comment">% Initial conditions w = [p; ux; uy; uz]</span>
+w0          = zeros([Ns 9]);
+w0(:,:,:,1) = exp(-1e3*(((xxc - mean(xc))/L(1)).^2 + ((yyc - mean(yc))/L(2)).^2 + ((zzc - mean(zc))/L(3)).^2));
+w0          = w0(:)/max(abs(w0(:)));
+</pre><h2>solve ODE<a name="3"></a></h2><pre class="codeinput">tic
+options  = odeset(<span class="string">'Stats'</span>,<span class="string">'on'</span>,<span class="string">'OutputFcn'</span>,@odewbar);
+[t,wsol] = ode23(@(t,w)(M*C*S*w),[0 T],w0,options) ;
+toc
+</pre><pre class="codeoutput">646 successful steps
+45 failed attempts
+2074 function evaluations
+Elapsed time is 93.744582 seconds.
+</pre><h2>plot<a name="4"></a></h2><pre class="codeinput">wsol = reshape(wsol,[length(t) prod(Ns) 9]);
+plotslice = @(u) slice(u,floor(N(1)/2) + 1,floor(N(2)/2) + 1,floor(N(3)/2) + 1);
+<span class="keyword">for</span> j=1:1:length(t);
+
+    v1j = reshape(A*squeeze(wsol(j,:,1).'),N);
+    v2j = reshape(A*squeeze(wsol(j,:,2).'),N);
+    v3j = reshape(A*squeeze(wsol(j,:,3).'),N);
+
+    t11j = reshape(A*squeeze(wsol(j,:,4).'),N);
+    t22j = reshape(A*squeeze(wsol(j,:,5).'),N);
+    t33j = reshape(A*squeeze(wsol(j,:,6).'),N);
+
+    t23j = reshape(A*squeeze(wsol(j,:,7).'),N);
+    t31j = reshape(A*squeeze(wsol(j,:,8).'),N);
+    t12j = reshape(A*squeeze(wsol(j,:,9).'),N);
+
+    subplot(3,3,1);
+    plotslice(v1j);title(<span class="string">'v_1'</span>);colormap(seiscol);
+    subplot(3,3,2);
+    plotslice(v2j);title(<span class="string">'v_2'</span>);colormap(seiscol);
+    subplot(3,3,3);
+    plotslice(v3j);title(<span class="string">'v_3'</span>);colormap(seiscol);
+    subplot(3,3,4);
+    plotslice(t11j);title(<span class="string">'t_{11}'</span>);colormap(seiscol);
+    subplot(3,3,5);
+    plotslice(t22j);title(<span class="string">'t_{22}'</span>);colormap(seiscol);
+    subplot(3,3,6);
+    plotslice(t33j);title(<span class="string">'t_{33}'</span>);colormap(seiscol);
+    subplot(3,3,7);
+    plotslice(t23j);title(<span class="string">'t_{23}'</span>);colormap(seiscol);
+    subplot(3,3,8);
+    plotslice(t31j);title(<span class="string">'t_{31}'</span>);colormap(seiscol);
+    subplot(3,3,9);
+    plotslice(t12j);title(<span class="string">'t_{12}'</span>);colormap(seiscol);
+
+    drawnow;
+    pause(.001);
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="Elastic_3d_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% 3D Elastic wave-equation
+% 
+% $$\left(\begin{array}{ccc}\rho&0&0\\0&I&0\\0&0&I \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{ccc}C_{11}&0&0\\0&C_{22}&0\\0&0&C_{33} \end{array}\right)\left(\begin{array}{ccc}0&D_1&D_2\\D_1&0&0\\D_2&0&0 \end{array}\right)\mathbf{w} = 0$$
+%
+% where
+%
+% $$C_{11} = I, \quad C_{22} = \left(\begin{array}{ccc}\lambda + 2\mu&\lambda&\lambda\\\lambda&\lambda + 2\mu &\lambda \\ \lambda &\lambda &\lambda + 2\mu \end{array}\right), \quad C_{33} = \left(\begin{array}{ccc}\mu&0&0\\0&\mu&0\\0&0&\mu \end{array}\right)$$
+%
+% $$D_1 = \left(\begin{array}{ccc}\partial_x&0&0\\0&\partial_y&0\\0&0&\partial_z \end{array}\right), \quad D_1 = \left(\begin{array}{ccc}0&\partial_z&\partial_y\\\partial_z&0&\partial_x\\\partial_y&\partial_x&0 \end{array}\right)$$
+
+%% set parameters
+%
+
+% method, fourier or cheb
+method = 'fourier';
+% dimension
+nd = 3;
+% size of domain (m)
+L = 1e3*ones(1,nd);
+% # of gridpoints
+N = 30*ones(1,nd);
+% # of nodes for spectral method
+Ns = 10*ones(1,nd);
+% time interval
+T = .5;
+% medium parameters
+rho0 = 1e3;
+cp0  = 2e3;
+cs0  = 1e3;
+
+%% define matrices etc.
+%
+store = false;
+
+% Gradient operator
+Dx = opDel(Ns,L,1,method,store);
+Dy = opDel(Ns,L,2,method,store);
+Dz = opDel(Ns,L,3,method,store);
+
+% 
+O = opZeros(prod(Ns));
+
+% spectral grid
+xc = Dx.x{1};
+yc = Dy.x{2};
+zc = Dz.x{3};
+[xxc,yyc,zzc] = ndgrid(xc,yc,zc);
+
+% stiffness matrix, note that Div = -Grad' !
+D1   = [O Dz Dy;Dz O Dx;Dy Dx O];
+D2   = opBlockDiag(Dx,Dy,Dz);
+OO   = opZeros(size(D1));
+S    = [OO D1 D2;-D1' OO OO;-D2' OO OO];
+
+% mass matrix
+rho       = rho0*ones(Ns);
+lambda    = rho0*(cp0^2 - cs0^2)*ones(Ns); 
+mu        = (cs0^2*rho0)*ones(Ns);
+
+M         = opDiag([1./rho(:);1./rho(:);1./rho(:);ones(6*prod(Ns),1)]);%opBlockDiag(opKron(opDirac(3),opDiag(1./rho(:))),opDirac(6*prod(Ns))); 
+C11       = opDirac(3*prod(Ns));
+C22       = [opDiag(lambda(:)+2*mu(:)) opDiag(lambda(:)) opDiag(lambda(:));opDiag(lambda(:)) opDiag(lambda(:)+2*mu(:)) opDiag(lambda(:));opDiag(lambda(:)) opDiag(lambda(:)) opDiag(lambda(:)+2*mu(:))];%opKron(opDirac(3),opDiag(2*mu(:))) + opKron(opOnes(3),opDiag(lambda(:)));
+C33       = opDiag([mu(:) mu(:) mu(:)]);%opKron(opDirac(3),opDiag(mu(:)));
+C         = opBlockDiag(C11,C22,C33);
+
+
+% regular grid
+x = linspace(0,L(1),N(1));
+y = linspace(0,L(2),N(2));
+z = linspace(0,L(3),N(3));
+
+% interpolation
+A = opKron(opInt(zc,z,method),opInt(yc,y,method),opInt(xc,x,method));
+
+% Initial conditions w = [p; ux; uy; uz]
+w0          = zeros([Ns 9]);
+w0(:,:,:,1) = exp(-1e3*(((xxc - mean(xc))/L(1)).^2 + ((yyc - mean(yc))/L(2)).^2 + ((zzc - mean(zc))/L(3)).^2));
+w0          = w0(:)/max(abs(w0(:)));
+
+
+%% solve ODE
+tic
+options  = odeset('Stats','on','OutputFcn',@odewbar);
+[t,wsol] = ode23(@(t,w)(M*C*S*w),[0 T],w0,options) ;
+toc
+
+%% plot
+wsol = reshape(wsol,[length(t) prod(Ns) 9]);
+plotslice = @(u) slice(u,floor(N(1)/2) + 1,floor(N(2)/2) + 1,floor(N(3)/2) + 1);
+for j=1:1:length(t);
+    
+    v1j = reshape(A*squeeze(wsol(j,:,1).'),N);
+    v2j = reshape(A*squeeze(wsol(j,:,2).'),N);
+    v3j = reshape(A*squeeze(wsol(j,:,3).'),N);
+    
+    t11j = reshape(A*squeeze(wsol(j,:,4).'),N);
+    t22j = reshape(A*squeeze(wsol(j,:,5).'),N);
+    t33j = reshape(A*squeeze(wsol(j,:,6).'),N);
+    
+    t23j = reshape(A*squeeze(wsol(j,:,7).'),N);
+    t31j = reshape(A*squeeze(wsol(j,:,8).'),N);
+    t12j = reshape(A*squeeze(wsol(j,:,9).'),N);
+    
+    subplot(3,3,1);
+    plotslice(v1j);title('v_1');colormap(seiscol);
+    subplot(3,3,2);
+    plotslice(v2j);title('v_2');colormap(seiscol);
+    subplot(3,3,3);
+    plotslice(v3j);title('v_3');colormap(seiscol);
+    subplot(3,3,4);
+    plotslice(t11j);title('t_{11}');colormap(seiscol);
+    subplot(3,3,5);
+    plotslice(t22j);title('t_{22}');colormap(seiscol);
+    subplot(3,3,6);
+    plotslice(t33j);title('t_{33}');colormap(seiscol);
+    subplot(3,3,7);
+    plotslice(t23j);title('t_{23}');colormap(seiscol);
+    subplot(3,3,8);
+    plotslice(t31j);title('t_{31}');colormap(seiscol);
+    subplot(3,3,9);
+    plotslice(t12j);title('t_{12}');colormap(seiscol);
+    
+    drawnow;
+    pause(.001);
+end
+##### SOURCE END #####
+--></body></html>

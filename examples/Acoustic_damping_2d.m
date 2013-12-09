@@ -1,8 +1,7 @@
-%% 2D Acoustic wave-equation
+%% 2D Acoustic wave-equation with Damping boundary
 % 
-% $$\left(\begin{array}{cc}\kappa^{-1}&0\\0&\rho \end{array}\right)\dot{\mathbf{w}} = \left(\begin{array}{cc}0&\nabla\cdot\\\nabla&0 \end{array}\right)\mathbf{w}$$
+% $$\left(\begin{array}{cc}\kappa^{-1}&0\\0&\rho \end{array}\right)\dot{\mathbf{w}} = \left(\begin{array}{cc}0&\nabla\cdot\\\nabla&0 \end{array}\right)\mathbf{w} - \left(\begin{array}{cc}\sigma&0\\0&\sigma \end{array}\right)\mathbf{w}$$
 %
-% 
 
 %% set parameters
 %
@@ -17,6 +16,10 @@ L = 1e3*ones(1,nd);
 N = 100*ones(1,nd);
 % # of nodes for spectral method
 Ns = 50*ones(1,nd);
+% # of damping points
+Npml = 10*ones(1,nd);
+% Damping strength
+beta = 100;
 % time interval
 T = 1;
 % medium parameters
@@ -42,6 +45,14 @@ rho    = rho0*ones(Ns);
 kappa  = (c0^2*rho0)*ones(Ns);
 M      = opDiag([kappa(:).^(-1);rho(:);rho(:)]);
 
+% Damping part
+sigmax = [beta*linspace(1,0,Npml(1)).^2 zeros(1,Ns(1)-2*Npml(1)) beta*linspace(0,1,Npml(1)).^2]'*ones(1,Ns(2));
+sigmay = ones(Ns(1),1)*[beta*linspace(1,0,Npml(2)).^2 zeros(1,Ns(2)-2*Npml(2)) beta*linspace(0,1,Npml(2)).^2];
+sigma  = sigmax + sigmay;
+
+B = opDiag([sigma(:);sigma(:);sigma(:)]);
+
+
 % regular grid
 x = linspace(0,L(1),N(1));
 y = linspace(0,L(2),N(2));
@@ -58,11 +69,12 @@ w0        = w0(:)/max(abs(w0(:)));
 %% solve ODE
 tic
 options  = odeset('Stats','on','OutputFcn',@odewbar);
-[t,wsol] = ode23(@(t,w)(M\(S*w)),[0 T],w0,options) ;
+[t,wsol] = ode23(@(t,w)(M\(S*w - M*B*w)),[0 T],w0,options) ;
 toc
 
 %% plot
 wsol = reshape(wsol,[length(t) prod(Ns) 3]);
+
 for j=1:1:length(t);
     
     pj = reshape(A*squeeze(wsol(j,:,1).'),N);

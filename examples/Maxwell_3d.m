@@ -1,6 +1,6 @@
 %% 3D Maxwell's equation
 % 
-% $$\left(\begin{array}{cc}\epsilon&0\\0&\mu \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{cc}0&\nabla\times\\\nabla\times&0 \end{array}\right)\mathbf{w} = 0$$
+% $$\left(\begin{array}{cc}\epsilon&0\\0&\mu \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{cc}0&\nabla\times\\-\nabla\times&0 \end{array}\right)\mathbf{w} = 0$$
 %
 
 
@@ -26,20 +26,21 @@ mu0  = 1.25e-6;  % magnetic permeability
 
 %% define matrices etc.
 %
-
+store = true;
 % Grad
-Grad = opGrad(Ns,L,method,true);
+Grad = opGrad(Ns,L,method,store);
 % Curl
-Curl = opCurl(Ns,L,method,true);
+Curl = opCurl(Ns,L,method,store);
+%
 
 % spectral grid
-xc = Curl.x{1};
-yc = Curl.x{2};
-zc = Curl.x{3};
+xc = Grad.x{1};
+yc = Grad.x{2};
+zc = Grad.x{3};
 [xxc,yyc,zzc] = ndgrid(xc,yc,zc);
 
 % stiffness matrix
-S    = [opZeros(nd*prod(Ns)) Curl; -Curl' opZeros(nd*prod(Ns))];
+S    = [opZeros(nd*prod(Ns)) Curl; -Curl opZeros(nd*prod(Ns))];
 
 % mass matrix
 eps    = eps0*ones(Ns); 
@@ -63,8 +64,8 @@ w0          = w0(:)/max(abs(w0(:)));
 
 %% solve ODE
 tic
-options  = odeset('Stats','on');
-[t,wsol] = ode23(@(t,w)-(M\(S*w)),[0 T],w0,options) ;
+options  = odeset('Stats','on','OutputFcn',@odewbar);
+[t,wsol] = ode23(@(t,w)(M\(S*w)),[0 T],w0,options) ;
 toc
 
 %% plot
@@ -81,19 +82,19 @@ for j=1:10:length(t);
     hzj = reshape(A*squeeze(wsol(j,:,3).'),N);
     
     subplot(2,3,1);
-    plotslice(exj);title('E_x');colormap(gray);
+    plotslice(exj);title('E_x');colormap(seiscol);
     subplot(2,3,2);
-    plotslice(eyj);title('E_y');colormap(gray);
+    plotslice(eyj);title('E_y');colormap(seiscol);
     subplot(2,3,3);
-    plotslice(ezj);title('E_z');colormap(gray);
+    plotslice(ezj);title('E_z');colormap(seiscol);
 
     subplot(2,3,4);
-    plotslice(hxj);title('H_x');colormap(gray);
+    plotslice(hxj);title('H_x');colormap(seiscol);
     subplot(2,3,5);
-    plotslice(hyj);title('H_y');colormap(gray);
+    plotslice(hyj);title('H_y');colormap(seiscol);
     subplot(2,3,6);
-    plotslice(hzj);title('H_z');colormap(gray);
+    plotslice(hzj);title('H_z');colormap(seiscol);
     
     drawnow;
-    pause(.001);
+    pause(1);
 end

@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>3D Maxwell's equation</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-11-25"><meta name="DC.source" content="Maxwell_3d.m"><style type="text/css">
+      --><title>3D Maxwell's equation</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-12-09"><meta name="DC.source" content="Maxwell_3d.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -65,7 +65,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>3D Maxwell's equation</h1><!--introduction--><p><img src="Maxwell_3d_eq62713.png" alt="$$\left(\begin{array}{cc}\epsilon&amp;0\\0&amp;\mu \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{cc}0&amp;\nabla\times\\\nabla\times&amp;0 \end{array}\right)\mathbf{w} = 0$$"></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">set parameters</a></li><li><a href="#2">define matrices etc.</a></li><li><a href="#3">solve ODE</a></li><li><a href="#4">plot</a></li></ul></div><h2>set parameters<a name="1"></a></h2><pre class="codeinput"><span class="comment">% method, fourier or cheb</span>
+  </style></head><body><div class="content"><h1>3D Maxwell's equation</h1><!--introduction--><p><img src="Maxwell_3d_eq74803.png" alt="$$\left(\begin{array}{cc}\epsilon&amp;0\\0&amp;\mu \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{cc}0&amp;\nabla\times\\-\nabla\times&amp;0 \end{array}\right)\mathbf{w} = 0$$"></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">set parameters</a></li><li><a href="#2">define matrices etc.</a></li><li><a href="#3">solve ODE</a></li><li><a href="#4">plot</a></li></ul></div><h2>set parameters<a name="1"></a></h2><pre class="codeinput"><span class="comment">% method, fourier or cheb</span>
 method = <span class="string">'fourier'</span>;
 <span class="comment">% dimension</span>
 nd = 3;
@@ -80,19 +80,21 @@ T = 1e-6;
 <span class="comment">% medium parameters</span>
 eps0 = 8.85e-12; <span class="comment">% di-electric permitivity</span>
 mu0  = 1.25e-6;  <span class="comment">% magnetic permeability</span>
-</pre><h2>define matrices etc.<a name="2"></a></h2><pre class="codeinput"><span class="comment">% Grad</span>
-Grad = opGrad(Ns,L,method,true);
+</pre><h2>define matrices etc.<a name="2"></a></h2><pre class="codeinput">store = true;
+<span class="comment">% Grad</span>
+Grad = opGrad(Ns,L,method,store);
 <span class="comment">% Curl</span>
-Curl = opCurl(Ns,L,method,true);
+Curl = opCurl(Ns,L,method,store);
+<span class="comment">%</span>
 
 <span class="comment">% spectral grid</span>
-xc = Curl.x{1};
-yc = Curl.x{2};
-zc = Curl.x{3};
+xc = Grad.x{1};
+yc = Grad.x{2};
+zc = Grad.x{3};
 [xxc,yyc,zzc] = ndgrid(xc,yc,zc);
 
 <span class="comment">% stiffness matrix</span>
-S    = [opZeros(nd*prod(Ns)) Curl; -Curl' opZeros(nd*prod(Ns))];
+S    = [opZeros(nd*prod(Ns)) Curl; -Curl opZeros(nd*prod(Ns))];
 
 <span class="comment">% mass matrix</span>
 eps    = eps0*ones(Ns);
@@ -113,13 +115,13 @@ w0(:,:,:,1) = (yyc - mean(yc)).*exp(-1e3*(((xxc - mean(xc))/L(1)).^2 + ((yyc - m
 w0(:,:,:,2) = -(xxc - mean(xc)).*exp(-1e3*(((xxc - mean(xc))/L(1)).^2 + ((yyc - mean(yc))/L(2)).^2 + ((zzc - mean(zc))/L(3)).^2));
 w0          = w0(:)/max(abs(w0(:)));
 </pre><h2>solve ODE<a name="3"></a></h2><pre class="codeinput">tic
-options  = odeset(<span class="string">'Stats'</span>,<span class="string">'on'</span>);
-[t,wsol] = ode23(@(t,w)-(M\(S*w)),[0 T],w0,options) ;
+options  = odeset(<span class="string">'Stats'</span>,<span class="string">'on'</span>,<span class="string">'OutputFcn'</span>,@odewbar);
+[t,wsol] = ode23(@(t,w)(M\(S*w)),[0 T],w0,options) ;
 toc
-</pre><pre class="codeoutput">2374 successful steps
-215 failed attempts
-7768 function evaluations
-Elapsed time is 38.674411 seconds.
+</pre><pre class="codeoutput">70 successful steps
+0 failed attempts
+211 function evaluations
+Elapsed time is 1.261906 seconds.
 </pre><h2>plot<a name="4"></a></h2><pre class="codeinput">wsol      = reshape(wsol,[length(t) prod(Ns) 6]);
 plotslice = @(u) slice(u,floor(N(1)/2) + 1,floor(N(2)/2) + 1,floor(N(3)/2) + 1);
 <span class="keyword">for</span> j=1:10:length(t);
@@ -133,27 +135,27 @@ plotslice = @(u) slice(u,floor(N(1)/2) + 1,floor(N(2)/2) + 1,floor(N(3)/2) + 1);
     hzj = reshape(A*squeeze(wsol(j,:,3).'),N);
 
     subplot(2,3,1);
-    plotslice(exj);title(<span class="string">'E_x'</span>);colormap(gray);
+    plotslice(exj);title(<span class="string">'E_x'</span>);colormap(seiscol);
     subplot(2,3,2);
-    plotslice(eyj);title(<span class="string">'E_y'</span>);colormap(gray);
+    plotslice(eyj);title(<span class="string">'E_y'</span>);colormap(seiscol);
     subplot(2,3,3);
-    plotslice(ezj);title(<span class="string">'E_z'</span>);colormap(gray);
+    plotslice(ezj);title(<span class="string">'E_z'</span>);colormap(seiscol);
 
     subplot(2,3,4);
-    plotslice(hxj);title(<span class="string">'H_x'</span>);colormap(gray);
+    plotslice(hxj);title(<span class="string">'H_x'</span>);colormap(seiscol);
     subplot(2,3,5);
-    plotslice(hyj);title(<span class="string">'H_y'</span>);colormap(gray);
+    plotslice(hyj);title(<span class="string">'H_y'</span>);colormap(seiscol);
     subplot(2,3,6);
-    plotslice(hzj);title(<span class="string">'H_z'</span>);colormap(gray);
+    plotslice(hzj);title(<span class="string">'H_z'</span>);colormap(seiscol);
 
     drawnow;
-    pause(.001);
+    pause(1);
 <span class="keyword">end</span>
 </pre><img vspace="5" hspace="5" src="Maxwell_3d_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% 3D Maxwell's equation
 % 
-% $$\left(\begin{array}{cc}\epsilon&0\\0&\mu \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{cc}0&\nabla\times\\\nabla\times&0 \end{array}\right)\mathbf{w} = 0$$
+% $$\left(\begin{array}{cc}\epsilon&0\\0&\mu \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{cc}0&\nabla\times\\-\nabla\times&0 \end{array}\right)\mathbf{w} = 0$$
 %
 
 
@@ -179,20 +181,21 @@ mu0  = 1.25e-6;  % magnetic permeability
 
 %% define matrices etc.
 %
-
+store = true;
 % Grad
-Grad = opGrad(Ns,L,method,true);
+Grad = opGrad(Ns,L,method,store);
 % Curl
-Curl = opCurl(Ns,L,method,true);
+Curl = opCurl(Ns,L,method,store);
+%
 
 % spectral grid
-xc = Curl.x{1};
-yc = Curl.x{2};
-zc = Curl.x{3};
+xc = Grad.x{1};
+yc = Grad.x{2};
+zc = Grad.x{3};
 [xxc,yyc,zzc] = ndgrid(xc,yc,zc);
 
 % stiffness matrix
-S    = [opZeros(nd*prod(Ns)) Curl; -Curl' opZeros(nd*prod(Ns))];
+S    = [opZeros(nd*prod(Ns)) Curl; -Curl opZeros(nd*prod(Ns))];
 
 % mass matrix
 eps    = eps0*ones(Ns); 
@@ -216,8 +219,8 @@ w0          = w0(:)/max(abs(w0(:)));
 
 %% solve ODE
 tic
-options  = odeset('Stats','on');
-[t,wsol] = ode23(@(t,w)-(M\(S*w)),[0 T],w0,options) ;
+options  = odeset('Stats','on','OutputFcn',@odewbar);
+[t,wsol] = ode23(@(t,w)(M\(S*w)),[0 T],w0,options) ;
 toc
 
 %% plot
@@ -234,21 +237,21 @@ for j=1:10:length(t);
     hzj = reshape(A*squeeze(wsol(j,:,3).'),N);
     
     subplot(2,3,1);
-    plotslice(exj);title('E_x');colormap(gray);
+    plotslice(exj);title('E_x');colormap(seiscol);
     subplot(2,3,2);
-    plotslice(eyj);title('E_y');colormap(gray);
+    plotslice(eyj);title('E_y');colormap(seiscol);
     subplot(2,3,3);
-    plotslice(ezj);title('E_z');colormap(gray);
+    plotslice(ezj);title('E_z');colormap(seiscol);
 
     subplot(2,3,4);
-    plotslice(hxj);title('H_x');colormap(gray);
+    plotslice(hxj);title('H_x');colormap(seiscol);
     subplot(2,3,5);
-    plotslice(hyj);title('H_y');colormap(gray);
+    plotslice(hyj);title('H_y');colormap(seiscol);
     subplot(2,3,6);
-    plotslice(hzj);title('H_z');colormap(gray);
+    plotslice(hzj);title('H_z');colormap(seiscol);
     
     drawnow;
-    pause(.001);
+    pause(1);
 end
 ##### SOURCE END #####
 --></body></html>

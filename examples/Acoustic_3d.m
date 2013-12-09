@@ -1,6 +1,6 @@
 %% 3D Acoustic wave-equation
 % 
-% $$\left(\begin{array}{cc}\kappa^{-1}&0\\0&\rho \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{cc}0&\nabla\cdot\\\nabla&0 \end{array}\right)\mathbf{w} = 0$$
+% $$\left(\begin{array}{cc}\kappa^{-1}&0\\0&\rho \end{array}\right)\dot{\mathbf{w}} = \left(\begin{array}{cc}0&\nabla\cdot\\\nabla&0 \end{array}\right)\mathbf{w}$$
 %
 
 
@@ -14,7 +14,7 @@ nd = 3;
 % size of domain (m)
 L = 1e3*ones(1,nd);
 % # of gridpoints
-N = 30*ones(1,nd);
+N = 50*ones(1,nd);
 % # of nodes for spectral method
 Ns = 10*ones(1,nd);
 % time interval
@@ -59,8 +59,8 @@ w0        = w0(:)/max(abs(w0(:)));
 
 %% solve ODE
 tic
-options  = odeset('Stats','on');
-[t,wsol] = ode23(@(t,w)-(M\(S*w)),[0 T],w0,options) ;
+options  = odeset('Stats','on','OutputFcn',@odewbar);
+[t,wsol] = ode23(@(t,w)(M\(S*w)),[0 T],w0,options) ;
 toc
 
 %% plot
@@ -74,13 +74,13 @@ for j=1:1:length(t);
     u3j = reshape(A*squeeze(wsol(j,:,4).'),N);
     
     subplot(2,2,1);
-    plotslice(pj);title('p');colormap(gray);
+    plotslice(pj);title('p');colormap(seiscol);
     subplot(2,2,2);
-    plotslice(u1j);title('u_1');colormap(gray);
+    plotslice(u1j);title('u_1');colormap(seiscol);
     subplot(2,2,3);
-    plotslice(u2j);title('u_2');colormap(gray);
+    plotslice(u2j);title('u_2');colormap(seiscol);
     subplot(2,2,4);
-    plotslice(u3j);title('u_3');colormap(gray);
+    plotslice(u3j);title('u_3');colormap(seiscol);
     drawnow;
     pause(.001);
 end
