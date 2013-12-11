@@ -114,20 +114,23 @@ classdef opCurl < opSpot
                for k=1:nd
                    for j=1:nd
                        t = x(:,j);
+                       z = 0*t;
                        for i=1:nd
                            t = reshape(t,op.N(i),[]);
+                           z = reshape(z,op.N(i),[]);
                            if LCS(k,i,j)
                                if op.store
-                                   z = t + LCS(k,i,j)*op.A{i} * t;
+                                   z = z + LCS(k,i,j)*op.A{i} * t;
                                else
-                                   z = t + LCS(k,i,j)*op.A{i}(t,1);
+                                   z = z + LCS(k,i,j)*op.A{i}(t,1);
                                end
                            else
-                               z = t;
+                               z = z;
                            end
-                           t = z.';
+                           t = t.';
+                           z = z.';
                        end
-                       y(:,k) = y(:,k) + t(:);
+                       y(:,k) = y(:,k) + z(:);
                    end
                end
                y = y(:);
@@ -141,9 +144,9 @@ classdef opCurl < opSpot
                            t = reshape(t,op.N(i),[]);
                            if LCS(k,i,j)
                                if op.store
-                                   z = t + LCS(k,i,j)*op.A{i}' * t;
+                                   z = t - LCS(k,i,j)*op.A{i}' * t;
                                else
-                                   z = t + LCS(k,i,j)*op.A{i}(t,-1);
+                                   z = t - LCS(k,i,j)*op.A{i}(t,-1);
                                end
                            else
                                z = t;

@@ -18,7 +18,7 @@ N = 100*ones(1,nd);
 % # of nodes for spectral method
 Ns = 50*ones(1,nd);
 % time interval
-T = 1;
+T = .5;
 % medium parameters
 rho0 = 1e3; % density kg/m^3
 c0   = 1e3; % velocity in m/s
@@ -27,7 +27,7 @@ c0   = 1e3; % velocity in m/s
 %
 
 % Gradient operator
-Grad = opGrad(Ns,L,method,true);
+Grad = opGrad(Ns,L,method,false);
 
 % spectral grid
 xc = Grad.x{1};
