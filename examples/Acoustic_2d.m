@@ -35,7 +35,7 @@ yc = Grad.x{2};
 [xxc,yyc] = ndgrid(xc,yc);
 
 % stiffness matrix, note that Div = -Grad' !
-S    = [opZeros(prod(Ns)) Grad; -Grad' opZeros(nd*prod(Ns))];
+S    = [opZeros(prod(Ns)) -Grad'; Grad opZeros(nd*prod(Ns))];
 
 % mass matrix
 rho    = rho0*ones(Ns); 

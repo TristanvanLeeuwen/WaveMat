@@ -39,7 +39,7 @@ classdef opGrad < opSpot
          % number of dimensions
          nd = length(N);
          
-         op = op@opSpot('Grad',prod(N),nd*prod(N));
+         op = op@opSpot('Grad',nd*prod(N),prod(N));
          op.A           = cell(1,nd);
          op.x           = cell(1,nd);
          op.N           = N;
@@ -75,6 +75,19 @@ classdef opGrad < opSpot
                          op.A{i} = @(x,mode)((1/a)*chebdifft(x,1,mode));
                      end
                  end
+             case 'fd'
+                 for i = 1:nd
+                     op.x{i} = linspace(0,1,N(i));
+                     a       = L(i)/(op.x{i}(end) - op.x{i}(1));
+                     op.x{i} = a*(op.x{i} - op.x{i}(1));
+                     if store
+                         [~,op.A{i}] = fddif(N(i),1);
+                         op.A{i}     = (1/a)*op.A{i};
+                     else
+                         op.A{i} = @(x,mode)((1/a)*fddif(N(i),1)*x);
+                     end
+                 end
+                 
              otherwise
                  error('Method not supported...');
          end
@@ -106,27 +119,6 @@ classdef opGrad < opSpot
        function y = opGrad_multiply(op,x,mode)
            nd    = length(op.N);
            if mode == 1
-               x = reshape(x,[prod(op.N) nd]);
-               y = zeros(prod(op.N),1);
-               for j=1:nd
-                   t = x(:,j);
-                   for i=1:nd
-                       k = op.N(i);
-                       t = reshape(t,k,[]);
-                       if i == j
-                           if op.store
-                               z = op.A{i} * t;
-                           else
-                               z = op.A{i}(t,1);
-                           end
-                       else
-                           z = t;
-                       end
-                       t = z.';
-                   end
-                   y = y + t(:);
-               end
-           else
                y = zeros(prod(op.N),nd);
                for j=1:nd
                    t = x;
@@ -147,6 +139,27 @@ classdef opGrad < opSpot
                    y(:,j) = t(:);
                end
                y = y(:);
+           else
+               x = reshape(x,[prod(op.N) nd]);
+               y = zeros(prod(op.N),1);
+               for j=1:nd
+                   t = x(:,j);
+                   for i=1:nd
+                       k = op.N(i);
+                       t = reshape(t,k,[]);
+                       if i == j
+                           if op.store
+                               z = op.A{i} * t;
+                           else
+                               z = op.A{i}(t,1);
+                           end
+                       else
+                           z = t;
+                       end
+                       t = z.';
+                   end
+                   y = y + t(:);
+               end
            end
            
        end

@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>2D Acoustic wave-equation</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2013-12-09"><meta name="DC.source" content="Acoustic_2d.m"><style type="text/css">
+      --><title>2D Acoustic wave-equation</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-02-25"><meta name="DC.source" content="Acoustic_2d.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -76,12 +76,12 @@ N = 100*ones(1,nd);
 <span class="comment">% # of nodes for spectral method</span>
 Ns = 50*ones(1,nd);
 <span class="comment">% time interval</span>
-T = 1;
+T = .5;
 <span class="comment">% medium parameters</span>
 rho0 = 1e3; <span class="comment">% density kg/m^3</span>
 c0   = 1e3; <span class="comment">% velocity in m/s</span>
 </pre><h2>define matrices etc.<a name="2"></a></h2><pre class="codeinput"><span class="comment">% Gradient operator</span>
-Grad = opGrad(Ns,L,method,true);
+Grad = opGrad(Ns,L,method,false);
 
 <span class="comment">% spectral grid</span>
 xc = Grad.x{1};
@@ -111,10 +111,10 @@ w0        = w0(:)/max(abs(w0(:)));
 options  = odeset(<span class="string">'Stats'</span>,<span class="string">'on'</span>,<span class="string">'OutputFcn'</span>,@odewbar);
 [t,wsol] = ode23(@(t,w)(M\(S*w)),[0 T],w0,options) ;
 toc
-</pre><pre class="codeoutput">496 successful steps
-14 failed attempts
-1531 function evaluations
-Elapsed time is 5.409454 seconds.
+</pre><pre class="codeoutput">225 successful steps
+5 failed attempts
+691 function evaluations
+Elapsed time is 1.691956 seconds.
 </pre><h2>plot<a name="4"></a></h2><pre class="codeinput">wsol = reshape(wsol,[length(t) prod(Ns) 3]);
 <span class="keyword">for</span> j=1:1:length(t);
 
@@ -153,7 +153,7 @@ N = 100*ones(1,nd);
 % # of nodes for spectral method
 Ns = 50*ones(1,nd);
 % time interval
-T = 1;
+T = .5;
 % medium parameters
 rho0 = 1e3; % density kg/m^3
 c0   = 1e3; % velocity in m/s
@@ -162,7 +162,7 @@ c0   = 1e3; % velocity in m/s
 %
 
 % Gradient operator
-Grad = opGrad(Ns,L,method,true);
+Grad = opGrad(Ns,L,method,false);
 
 % spectral grid
 xc = Grad.x{1};

@@ -36,6 +36,8 @@ classdef opInt < opSpot
                  op.funHandle = @opInt_cheb;
              case 'fourier'
                  op.funHandle = @opInt_fourier;
+             case 'fd'
+                 op.funHandle = @opInt_fd;  
              otherwise
                  error('Method not supported');
          end
@@ -75,6 +77,10 @@ classdef opInt < opSpot
           b =-op.xc(1).*a;
           
           y = fourint(f,a*op.x + b,mode); 
+      end
+      
+      function y = opInt_fd(op,f,mode)
+          y = f;
       end
       
    end % Methods
