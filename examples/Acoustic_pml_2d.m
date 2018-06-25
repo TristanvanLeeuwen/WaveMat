@@ -80,7 +80,7 @@ toc
 %% plot
 wsol = reshape(wsol,[length(t) prod(Ns) 4]);
 
-for j=1:1:length(t);
+for j=1:1:length(t)
     
     pj = reshape(A*squeeze(wsol(j,:,1).' + wsol(j,:,2).'),N);
     uj = reshape(A*squeeze(wsol(j,:,3).'),N);
