@@ -3,8 +3,6 @@
 % $$\left(\begin{array}{cc}\epsilon&0\\0&\mu \end{array}\right)\dot{\mathbf{w}} + \left(\begin{array}{cc}0&\nabla\times\\-\nabla\times&0 \end{array}\right)\mathbf{w} = 0$$
 %
 
-
-
 %% set parameters
 %
 

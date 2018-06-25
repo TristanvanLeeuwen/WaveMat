@@ -8,7 +8,7 @@
 %
 
 % method, fourier or cheb
-method = 'fourier';
+method = 'cheb';
 % dimension
 nd = 2;
 % size of domain (m)
